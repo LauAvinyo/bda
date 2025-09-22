@@ -46,10 +46,9 @@ const CalculatorsPage: React.FC = () => {
             }`}
           >
             <span className="text-xl sm:text-2xl font-pixel">{calc.icon}</span>
-            <div className="text-left">
-              <div className="font-display font-semibold tracking-wider text-sm sm:text-base">{calc.name}</div>
-              <div className="text-xs font-pixel opacity-80">{calc.description}</div>
-            </div>
+                <div className="text-left">
+                  <div className="font-display font-semibold tracking-wider text-sm sm:text-base">{calc.name}</div>
+                </div>
           </button>
         ))}
       </div>
