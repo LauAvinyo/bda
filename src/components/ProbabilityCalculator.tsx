@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-type DistributionType = 'binomial' | 'normal' | 'poisson';
+type DistributionType = 'binomial' | 'normal' | 'poisson' | 't-distribution';
 type CalculationType = 'density' | 'cumulative_lower' | 'cumulative_upper' | 'between';
 
 interface DistributionParams {
   binomial: { n: number; p: number };
   normal: { mean: number; sd: number };
   poisson: { lambda: number };
+  't-distribution': { df: number };
 }
 
 const ProbabilityCalculator: React.FC = () => {
@@ -20,7 +21,8 @@ const ProbabilityCalculator: React.FC = () => {
   const [params, setParams] = useState<DistributionParams>({
     binomial: { n: 10, p: 0.5 },
     normal: { mean: 0, sd: 1 },
-    poisson: { lambda: 2 }
+    poisson: { lambda: 2 },
+    't-distribution': { df: 10 }
   });
 
   // Error function for normal distribution
@@ -80,11 +82,77 @@ const ProbabilityCalculator: React.FC = () => {
         return 0.5 * (1 + erf((x - mean) / (sd * Math.sqrt(2))));
       }
     },
+    't-distribution': {
+      pdf: (x: number): number => {
+        const { df } = params['t-distribution'];
+        const gamma1 = Math.exp(distributions['t-distribution'].logGamma((df + 1) / 2));
+        const gamma2 = Math.exp(distributions['t-distribution'].logGamma(df / 2));
+        return (gamma1 / (Math.sqrt(df * Math.PI) * gamma2)) * 
+               Math.pow(1 + (x * x) / df, -(df + 1) / 2);
+      },
+      cdf: (x: number): number => {
+        const { df } = params['t-distribution'];
+        
+        if (df === 1) {
+          // Cauchy distribution (t with df=1)
+          return 0.5 + Math.atan(x) / Math.PI;
+        }
+        
+        if (df === 2) {
+          // Simplified formula for df=2
+          return 0.5 + x / (2 * Math.sqrt(2 + x * x));
+        }
+        
+        // For larger df, use better approximation
+        if (df >= 30) {
+          // For large df, t-distribution approaches standard normal
+          return 0.5 * (1 + erf(x / Math.sqrt(2)));
+        }
+        
+        // General case: use series approximation
+        const t = x / Math.sqrt(df);
+        const absT = Math.abs(t);
+        
+        // Wilson-Hilferty approximation for moderate df
+        let p = 0;
+        if (absT < 4) {
+          // Series expansion
+          p = 0.5 * (1 + erf(t * Math.sqrt((df - 1) / df) * (1 + (t * t + 1) / (4 * df) + (5 * t * t * t * t + 16 * t * t + 3) / (96 * df * df)) / Math.sqrt(2)));
+        } else {
+          // For extreme values, use asymptotic approximation
+          const z = Math.sqrt(df) * x / Math.sqrt(df + x * x);
+          p = 0.5 * (1 + erf(z / Math.sqrt(2)));
+        }
+        
+        return Math.max(0, Math.min(1, p));
+      },
+      logGamma: (x: number): number => {
+        if (x < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * x)) - distributions['t-distribution'].logGamma(1 - x);
+        x -= 1;
+        const coeffs = [
+          0.99999999999980993,
+          676.5203681218851,
+          -1259.1392167224028,
+          771.32342877765313,
+          -176.61502916214059,
+          12.507343278686905,
+          -0.13857109526572012,
+          9.9843695780195716e-6,
+          1.5056327351493116e-7
+        ];
+        let result = coeffs[0];
+        for (let i = 1; i < coeffs.length; i++) {
+          result += coeffs[i] / (x + i);
+        }
+        const t = x + coeffs.length - 1.5;
+        return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(result);
+      }
+    },
     poisson: {
       pmf: (k: number): number => {
         const { lambda } = params.poisson;
         if (k < 0 || !Number.isInteger(k)) return 0;
-        return (Math.pow(lambda, k) * Math.exp(-lambda)) / distributions.poisson.factorial(k);
+        return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k);
       },
       cdf: (k: number): number => {
         let sum = 0;
@@ -92,23 +160,19 @@ const ProbabilityCalculator: React.FC = () => {
           sum += distributions.poisson.pmf(i);
         }
         return sum;
-      },
-      factorial: (n: number): number => {
-        if (n <= 1) return 1;
-        let result = 1;
-        for (let i = 2; i <= n; i++) {
-          result *= i;
-        }
-        return result;
       }
     }
   };
 
-  // Fix Poisson factorial reference
-  distributions.poisson.pmf = (k: number): number => {
-    const { lambda } = params.poisson;
-    if (k < 0 || !Number.isInteger(k)) return 0;
-    return (Math.pow(lambda, k) * Math.exp(-lambda)) / distributions.poisson.factorial(k);
+  // Helper function for factorial
+  const factorial = (num: number): number => {
+    if (num < 0) return NaN;
+    if (num === 0) return 1;
+    let result = 1;
+    for (let i = 1; i <= num; i++) {
+      result *= i;
+    }
+    return result;
   };
 
   const calculateResult = (): number => {
@@ -149,6 +213,18 @@ const ProbabilityCalculator: React.FC = () => {
             return distributions.poisson.cdf(upperValue) - distributions.poisson.cdf(value - 1);
         }
         break;
+      case 't-distribution':
+        switch (calculationType) {
+          case 'density':
+            return distributions['t-distribution'].pdf(value);
+          case 'cumulative_lower':
+            return distributions['t-distribution'].cdf(value);
+          case 'cumulative_upper':
+            return 1 - distributions['t-distribution'].cdf(value);
+          case 'between':
+            return distributions['t-distribution'].cdf(upperValue) - distributions['t-distribution'].cdf(value);
+        }
+        break;
     }
     return 0;
   };
@@ -171,6 +247,10 @@ const ProbabilityCalculator: React.FC = () => {
       xMin = mean - 4 * sd;
       xMax = mean + 4 * sd;
       isDiscrete = false;
+    } else if (distribution === 't-distribution') {
+      xMin = -4;
+      xMax = 4;
+      isDiscrete = false;
     } else { // poisson
       xMin = 0;
       xMax = Math.max(20, params.poisson.lambda * 3);
@@ -183,7 +263,7 @@ const ProbabilityCalculator: React.FC = () => {
         
         if (distribution === 'binomial') {
           y = distributions.binomial.pmf(i);
-        } else {
+        } else { // poisson
           y = distributions.poisson.pmf(i);
         }
         
@@ -205,11 +285,13 @@ const ProbabilityCalculator: React.FC = () => {
         data.push({ x: i, y, highlighted });
       }
     } else {
-      // Normal distribution - continuous
+      // Continuous distributions (Normal, t-distribution)
       const steps = 200;
       for (let i = 0; i <= steps; i++) {
         const x = xMin + (i / steps) * (xMax - xMin);
-        const y = distributions.normal.pdf(x);
+        const y = distribution === 'normal' 
+          ? distributions.normal.pdf(x)
+          : distributions['t-distribution'].pdf(x);
         
         let highlighted = false;
         switch (calculationType) {
@@ -242,6 +324,7 @@ const ProbabilityCalculator: React.FC = () => {
     const { mean, sd } = params.normal;
     const { n, p } = params.binomial;
     const { lambda } = params.poisson;
+    const { df } = params['t-distribution'];
     
     switch (distribution) {
       case 'binomial':
@@ -280,6 +363,18 @@ const ProbabilityCalculator: React.FC = () => {
             return `ppois(${upperValue}, ${lambda}) - ppois(${value-1}, ${lambda})`;
         }
         break;
+      case 't-distribution':
+        switch (calculationType) {
+          case 'density':
+            return `dt(${value}, ${df})`;
+          case 'cumulative_lower':
+            return `pt(${value}, ${df})`;
+          case 'cumulative_upper':
+            return `pt(${value}, ${df}, lower.tail=FALSE)`;
+          case 'between':
+            return `pt(${upperValue}, ${df}) - pt(${value}, ${df})`;
+        }
+        break;
     }
     return '';
   };
@@ -314,7 +409,7 @@ const ProbabilityCalculator: React.FC = () => {
         {/* Input Panel */}
         <div className="retro-card p-6">
           <div className="terminal-window p-3 mb-4">
-            <span className="font-pixel text-amber-400">PROBABILITY.EXE RUNNING</span>
+            <span className="font-pixel text-amber-400">PROBABILITY RUNNING</span>
           </div>
           <h3 className="text-xl font-display font-semibold mb-4 text-amber-900 tracking-wider">DISTRIBUTION CALCULATOR</h3>
           
@@ -332,6 +427,7 @@ const ProbabilityCalculator: React.FC = () => {
                 <option value="binomial">Binomial</option>
                 <option value="normal">Normal</option>
                 <option value="poisson">Poisson</option>
+                <option value="t-distribution">t-Distribution</option>
               </select>
             </div>
 
@@ -413,6 +509,22 @@ const ProbabilityCalculator: React.FC = () => {
               </div>
             )}
 
+            {distribution === 't-distribution' && (
+              <div>
+                <label className="block text-sm font-pixel text-amber-800 mb-2 tracking-wide">
+                  DEGREES OF FREEDOM (df)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={params['t-distribution'].df}
+                  onChange={(e) => updateParam('df', parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border-2 border-amber-600 bg-amber-50 font-mono text-amber-900 focus:outline-none focus:bg-amber-100"
+                />
+              </div>
+            )}
+
             {/* Calculation Type */}
             <div>
               <label className="block text-sm font-pixel text-amber-800 mb-2 tracking-wide">
@@ -424,7 +536,7 @@ const ProbabilityCalculator: React.FC = () => {
                 className="w-full px-3 py-2 border-2 border-amber-600 bg-amber-50 font-mono text-amber-900 focus:outline-none focus:bg-amber-100"
               >
                 <option value="density">
-                  {distribution === 'normal' ? 'Density f(x)' : 'Probability P(X = k)'}
+                  {(distribution === 'normal' || distribution === 't-distribution') ? 'Density f(x)' : 'Probability P(X = k)'}
                 </option>
                 <option value="cumulative_lower">P(X ≤ k) - Lower tail</option>
                 <option value="cumulative_upper">P(X ≥ k) - Upper tail</option>
@@ -439,7 +551,7 @@ const ProbabilityCalculator: React.FC = () => {
               </label>
               <input
                 type="number"
-                step={distribution === 'normal' ? '0.1' : '1'}
+                step={(distribution === 'normal' || distribution === 't-distribution') ? '0.1' : '1'}
                 value={value}
                 onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
                 className="w-full px-3 py-2 border-2 border-amber-600 bg-amber-50 font-mono text-amber-900 focus:outline-none focus:bg-amber-100"
@@ -453,7 +565,7 @@ const ProbabilityCalculator: React.FC = () => {
                 </label>
                 <input
                   type="number"
-                  step={distribution === 'normal' ? '0.1' : '1'}
+                  step={(distribution === 'normal' || distribution === 't-distribution') ? '0.1' : '1'}
                   value={upperValue}
                   onChange={(e) => setUpperValue(parseFloat(e.target.value) || 0)}
                   className="w-full px-3 py-2 border-2 border-amber-600 bg-amber-50 font-mono text-amber-900 focus:outline-none focus:bg-amber-100"
@@ -512,6 +624,13 @@ const ProbabilityCalculator: React.FC = () => {
                     <div>λ = {params.poisson.lambda}</div>
                     <div>Mean = λ = {params.poisson.lambda}</div>
                     <div>Variance = λ = {params.poisson.lambda}</div>
+                  </>
+                )}
+                {distribution === 't-distribution' && (
+                  <>
+                    <div>df = {params['t-distribution'].df}</div>
+                    <div>Mean = 0 (if df &gt; 1)</div>
+                    <div>Variance = df/(df-2) = {params['t-distribution'].df > 2 ? (params['t-distribution'].df / (params['t-distribution'].df - 2)).toFixed(2) : 'undefined'} (if df &gt; 2)</div>
                   </>
                 )}
               </div>
@@ -591,26 +710,26 @@ const ProbabilityCalculator: React.FC = () => {
                   stroke="#8B4513"
                   strokeWidth="2"
                 />
-                {/* Highlighted area */}
+                {/* Highlighted area - simplified */}
                 {calculationType !== 'density' && (
-                  <polyline
-                    points={[
-                      ...plotInfo.data.filter(p => p.highlighted).map((point) => {
-                        const originalIndex = plotInfo.data.indexOf(point);
-                        const x = 60 + (originalIndex / (plotInfo.data.length - 1)) * 680;
-                        const y = 300 - (point.y / maxY) * 250;
-                        return `${x},${y}`;
-                      }),
-                      // Close the area
-                      ...[...plotInfo.data.filter(p => p.highlighted)].reverse().map((point) => {
-                        const originalIndex = plotInfo.data.indexOf(point);
-                        const x = 60 + (originalIndex / (plotInfo.data.length - 1)) * 680;
-                        return `${x},300`;
-                      })
-                    ].join(' ')}
-                    fill="rgba(255, 140, 0, 0.6)"
-                    stroke="none"
-                  />
+                  <g>
+                    {plotInfo.data.map((point, i) => {
+                      if (!point.highlighted) return null;
+                      const x = 60 + (i / (plotInfo.data.length - 1)) * 680;
+                      const y = 300 - (point.y / maxY) * 250;
+                      return (
+                        <line
+                          key={i}
+                          x1={x}
+                          y1={300}
+                          x2={x}
+                          y2={y}
+                          stroke="rgba(255, 140, 0, 0.8)"
+                          strokeWidth="2"
+                        />
+                      );
+                    })}
+                  </g>
                 )}
               </>
             )}
@@ -636,10 +755,10 @@ const ProbabilityCalculator: React.FC = () => {
             
             {/* Labels */}
             <text x="400" y="345" textAnchor="middle" fontSize="12" fill="#8B4513" fontFamily="monospace">
-              {distribution === 'normal' ? 'Value (x)' : 'Number of Events (k)'}
+              {(distribution === 'normal' || distribution === 't-distribution') ? 'Value (x)' : 'Number of Events (k)'}
             </text>
             <text x="30" y="175" textAnchor="middle" fontSize="12" fill="#8B4513" fontFamily="monospace" transform="rotate(-90 30 175)">
-              {distribution === 'normal' ? 'Density' : 'Probability'}
+              {(distribution === 'normal' || distribution === 't-distribution') ? 'Density' : 'Probability'}
             </text>
           </svg>
         </div>

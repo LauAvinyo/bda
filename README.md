@@ -4,9 +4,9 @@ A nostalgic retro-style Single Page Application (SPA) for biostatistics educatio
 
 ## Features
 
-- **TESTS.EXE**: Comprehensive statistical test documentation with LaTeX formulas in retro terminal styling
+- **TESTS**: Comprehensive statistical test documentation with LaTeX formulas in retro terminal styling
 - **CHARTS.COM**: Interactive probability distribution plots with classic computing interface
-- **CALC.BAT**: P-value and power calculators with authentic retro design elements
+- **CALC**: P-value and power calculators with authentic retro design elements
 - **Terminal-Style UI**: Nostalgic computing experience with pixel art elements and vintage fonts
 - **Retro Aesthetic**: Warm beige/cream color palette reminiscent of classic computers
 
@@ -87,7 +87,7 @@ src/
 
 ## Retro Computing Features
 
-### TESTS.EXE - Statistical Documentation
+### TESTS - Statistical Documentation
 - Student's t-test library with retro formatting
 - ANOVA documentation in terminal style
 - Chi-square tests with pixel art elements
@@ -101,7 +101,7 @@ src/
 - F-distribution with amber/beige color scheme
 - Binomial and Poisson with pixel art indicators
 
-### CALC.BAT - Statistical Calculators
+### CALC - Statistical Calculators
 - P-value calculator with terminal output styling
 - Statistical power analysis in retro format
 - Sample size determination with classic interface

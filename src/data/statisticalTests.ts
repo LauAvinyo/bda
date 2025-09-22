@@ -59,53 +59,54 @@ The t-test is a statistical hypothesis test used to determine if there is a sign
 ## Types of t-tests
 
 ### One-sample t-test
-Tests whether the mean of a single group differs from a known value (usually 0).
+Tests whether the mean of a single group differs from a desired or known value (usually 0, but it can be any value).
 
 **Formula:**
-$$t = \\frac{\\bar{x} - \\mu_0}{s / \\sqrt{n}}$$
+$$t = \\frac{M - \\mu_0}{\\sigma_M}$$
 
 Where:
-- $\\bar{x}$ = sample mean
+- $M$ = sample mean
 - $\\mu_0$ = hypothesized population mean
+- $\\sigma_M$ = standard error of the mean (std of the population of the Means)
 
-    But in some cases we use a threshold of 0.01 or 0.001.
-
-    But in some cases we use a threshold of 0.01 or 0.001.
-
-    But in some cases we use a threshold of 0.01 or 0.001.
-- $s$ = sample standard deviation
-- $n$ = sample size
+And, 
+$$\\sigma_M = \\frac{\\sigma}{\\sqrt{n}}$$
+The $\\sigma$ is the standard deviation of the population. And usually unkown.
+In some cases, for instance, when we are using a binomial distribution, we can compute the $\\sigma$ for the null hypothesis.
+And hence, in such cases we can compute the $\\sigma_M$ and use the normal distribution to compute the p-value.
+However, in most cases, we don't know the $\\sigma$ of the population. 
+Therefore, we use the sample standard deviation to compute the $\\sigma_M$ and use the t-distribution to compute the p-value.
 
 ### Two-sample t-test (Independent samples)
 Tests whether the means of two independent groups differ significantly.
 
 **Equal variances assumed:**
-$$t = \\frac{\\bar{x_1} - \\bar{x_2}}{s_p \\sqrt{\\frac{1}{n_1} + \\frac{1}{n_2}}}$$
+$$t = \\frac{M_1 - M_2}{\\sigma_{M_1 - M_2}$$
 
-Where $s_p$ is the pooled standard deviation:
-$$s_p = \\sqrt{\\frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1 + n_2 - 2}}$$
+Where, $\\sigma_{M_1 - M_2}$ is the standard error of the difference between the means:
+$$\\sigma_{M_1 - M_2} = \\sqrt{\\frac{\\sigma_1^2}{n_1} + \\frac{\\sigma_2^2}{n_2}}$$
+
+Most, of the time, we do not know the $\\sigma$ of the populations.
+Therefore, we use the average of the sample standard deviations to compute the $\\sigma_{M_1 - M_2}$ and use the t-distribution to compute the p-value.
+
+Once we have the t-statistic, we can compute the p-value using the t-distribution.
+We have to decide the degrees of freedom.
+In the case of the two-sample t-test, the degrees of freedom is the sum of the degrees of freedom of the two samples minus 2 (because we are using 2 sample means).
+$$df = n_1 + n_2 - 2$$
+
+Finally, we select the value of the t-distribution that corresponds to the t-statistic and the degrees of freedom.
+And we compute the p-value using a table or the t-distribution calculator.
+
+Finally, we compare the p-value with the significance level to decide if we can or cannot reject the null hypothesis.
 
 ### Paired t-test
-Tests whether the mean difference between paired observations is significantly different from zero.
+TBD
 
-$$t = \\frac{\\bar{d}}{s_d / \\sqrt{n}}$$
-
-Where:
-- $\\bar{d}$ = mean of the differences
-- $s_d$ = standard deviation of the differences
 
 ## Assumptions
 1. **Normality**: Data should be approximately normally distributed
-2. **Independence**: Observations should be independent
-3. **Homogeneity of variance**: For two-sample tests, variances should be approximately equal
-
-## Example
-A researcher wants to test if a new drug reduces blood pressure. They measure blood pressure before and after treatment for 20 patients:
-
-- Null hypothesis ($H_0$): $\\mu_d = 0$ (no difference)
-- Alternative hypothesis ($H_1$): $\\mu_d \\neq 0$ (there is a difference)
-
-If the calculated t-statistic exceeds the critical value, we reject the null hypothesis.
+2. **Homogeneity of variance**: For two-sample tests, variances should be approximately equal
+3. **Independence**: Observations should be independent
     `
   },
   'anova': {

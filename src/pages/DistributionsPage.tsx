@@ -85,9 +85,6 @@ const DistributionsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-2xl md:text-4xl font-display font-bold mb-4 gradient-text tracking-wider">PROBABILITY DISTRIBUTIONS</h1>
-        <p className="text-lg text-amber-800 max-w-3xl mx-auto font-mono">
-          Interactive statistical distribution visualization system
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

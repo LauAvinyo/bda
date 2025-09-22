@@ -12,7 +12,7 @@ const HomePage: React.FC = () => {
           <div className="mb-2">
             {/* <div className="terminal-window inline-block p-4 mb-8">
               <div className="font-pixel text-amber-400 text-lg mb-2">
-                LOADING BIOSTATS.EXE
+                LOADING BIOSTATS
               </div>
               <div className="font-pixel text-amber-300 text-sm">
                 ████████████ 100% COMPLETE ████████████

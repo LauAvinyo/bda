@@ -443,7 +443,7 @@ const PValueCalculator: React.FC = () => {
         {/* Input Panel */}
         <div className="retro-card p-6">
           <div className="terminal-window p-3 mb-4">
-            <span className="font-pixel text-amber-400">P-VALUE.EXE RUNNING</span>
+            <span className="font-pixel text-amber-400">P-VALUE RUNNING</span>
           </div>
           <h3 className="text-xl font-display font-semibold mb-4 text-amber-900 tracking-wider">CALCULATOR SETTINGS</h3>
           

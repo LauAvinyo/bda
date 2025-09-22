@@ -9,20 +9,20 @@ const CalculatorsPage: React.FC = () => {
   const calculators = [
     {
       id: 'pvalue',
-      name: 'P-VALUE.EXE',
-      description: 'Calculate p-values for statistical tests',
+      name: 'P-VALUE',
+      // description: 'Calculate p-values for statistical tests',
       icon: 'P'
     },
     // {
     //   id: 'power',
-    //   name: 'POWER.COM',
+    //   name: 'POWER',
     //   description: 'Statistical power and sample size',
     //   icon: 'S'
     // },
     {
       id: 'probability',
-      name: 'PROBABILITY.BAT',
-      description: 'Multi-distribution calculator (Normal, Binomial, Poisson)',
+      name: 'PROBABILITY',
+      // description: 'Multi-distribution calculator (Normal, Binomial, Poisson, t-Distribution)',
       icon: 'Π'
     }
   ];
@@ -31,9 +31,6 @@ const CalculatorsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-2xl md:text-4xl font-display font-bold mb-4 gradient-text tracking-wider">STATISTICAL CALCULATORS</h1>
-        <p className="text-lg text-amber-800 max-w-3xl mx-auto font-mono">
-          Interactive computational tools for statistical analysis
-        </p>
       </div>
 
       {/* Calculator Selection */}
