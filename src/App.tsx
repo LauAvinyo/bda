@@ -7,7 +7,7 @@ import CalculatorsPage from './pages/CalculatorsPage';
 
 function App() {
   return (
-    <Router basename="/biostats-spa">
+    <Router basename="/bda">
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
