@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Home', href: '/', label: 'HOME' },
-    { name: 'Statistical Tests', href: '/tests', label: 'TESTS' },
+    { name: 'Statistical Tests', href: '/docs', label: 'DOCS' },
     { name: 'Distributions', href: '/distributions', label: 'CHARTS' },
     { name: 'Calculators', href: '/calculators', label: 'CALC' },
   ];
