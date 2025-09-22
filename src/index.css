@@ -1,0 +1,334 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono:wght@400&family=Courier+Prime:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+/* Nostalgic Retro Computing Theme */
+:root {
+  --color-primary: #8B4513;        /* Saddle Brown */
+  --color-secondary: #CD853F;      /* Peru */
+  --color-accent: #D2691E;         /* Chocolate */
+  --color-background: #F5F5DC;     /* Beige */
+  --color-surface: #FAEBD7;       /* Antique White */
+  --color-card: #FFF8DC;          /* Cornsilk */
+  --color-border: #DEB887;        /* Burlywood */
+  --color-text: #2F1B14;          /* Dark Brown */
+  --color-text-muted: #8B7355;    /* Dark Khaki */
+  --color-retro-orange: #FF8C00;  /* Dark Orange */
+  --color-retro-amber: #FFBF00;   /* Amber */
+  --color-retro-brown: #A0522D;   /* Sienna */
+  --color-retro-cream: #FFFDD0;   /* Cream */
+  --color-warning: #FF6347;       /* Tomato */
+  --font-display: 'VT323', monospace;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Courier Prime', monospace;
+  --font-pixel: 'Share Tech Mono', monospace;
+}
+
+/* KaTeX styles for LaTeX rendering */
+@import "katex/dist/katex.min.css";
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--color-background);
+  color: var(--color-text);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  overflow-x: hidden;
+}
+
+/* Retro Dot Matrix Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(139, 69, 19, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Vintage Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Selection Styling */
+::selection {
+  background: var(--color-retro-amber);
+  color: var(--color-text);
+}
+
+/* Typography Classes */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.1em;
+}
+
+/* Custom styles for mathematical expressions */
+.math-display {
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--color-primary);
+  background: var(--color-retro-cream);
+  padding: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0;
+  font-family: var(--font-mono);
+}
+
+.math-inline {
+  font-size: inherit;
+  color: var(--color-accent);
+  background: var(--color-retro-cream);
+  padding: 2px 4px;
+  border-radius: 0;
+}
+
+/* Retro Text Effects */
+.retro-text {
+  color: var(--color-primary);
+  text-shadow: 2px 2px 0px var(--color-retro-amber);
+}
+
+.retro-text-accent {
+  color: var(--color-accent);
+  text-shadow: 1px 1px 0px var(--color-retro-cream);
+}
+
+.retro-text-orange {
+  color: var(--color-retro-orange);
+  text-shadow: 1px 1px 0px var(--color-surface);
+}
+
+/* Retro Gradients */
+.gradient-retro {
+  background: linear-gradient(135deg, 
+    var(--color-retro-amber) 0%, 
+    var(--color-retro-orange) 50%, 
+    var(--color-primary) 100%);
+}
+
+.gradient-warm {
+  background: linear-gradient(135deg, 
+    var(--color-surface) 0%, 
+    var(--color-retro-cream) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, 
+    var(--color-primary), 
+    var(--color-accent), 
+    var(--color-retro-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+.gradient-text-alt {
+  background: linear-gradient(135deg, 
+    var(--color-retro-brown), 
+    var(--color-secondary), 
+    var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Retro Computer Cards */
+.retro-card {
+  background: var(--color-card);
+  border: 3px solid var(--color-border);
+  border-radius: 0;
+  position: relative;
+  box-shadow: 
+    inset 2px 2px 0 var(--color-retro-cream),
+    inset -2px -2px 0 var(--color-retro-brown),
+    4px 4px 0 rgba(139, 69, 19, 0.3);
+  transition: all 0.2s ease;
+}
+
+.retro-card::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid var(--color-retro-amber);
+  pointer-events: none;
+}
+
+.retro-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 
+    inset 2px 2px 0 var(--color-retro-cream),
+    inset -2px -2px 0 var(--color-retro-brown),
+    6px 6px 0 rgba(139, 69, 19, 0.4);
+}
+
+/* Retro Buttons */
+.btn-retro {
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  color: var(--color-text);
+  padding: 12px 24px;
+  border-radius: 0;
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: 
+    inset 2px 2px 0 var(--color-retro-cream),
+    inset -2px -2px 0 var(--color-retro-brown),
+    2px 2px 0 rgba(139, 69, 19, 0.3);
+}
+
+.btn-retro:hover {
+  background: var(--color-retro-amber);
+  color: var(--color-text);
+  transform: translate(-1px, -1px);
+  box-shadow: 
+    inset 2px 2px 0 var(--color-retro-cream),
+    inset -2px -2px 0 var(--color-retro-brown),
+    3px 3px 0 rgba(139, 69, 19, 0.4);
+}
+
+.btn-retro:active {
+  transform: translate(1px, 1px);
+  box-shadow: 
+    inset -1px -1px 0 var(--color-retro-cream),
+    inset 1px 1px 0 var(--color-retro-brown),
+    1px 1px 0 rgba(139, 69, 19, 0.3);
+}
+
+/* Retro Animations */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes typewriter {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.98; }
+}
+
+@keyframes retro-pulse {
+  0%, 100% { 
+    background-color: var(--color-retro-amber);
+    box-shadow: 0 0 5px var(--color-retro-amber);
+  }
+  50% { 
+    background-color: var(--color-retro-orange);
+    box-shadow: 0 0 10px var(--color-retro-orange);
+  }
+}
+
+/* Interactive Elements */
+.interactive {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.interactive:hover {
+  transform: scale(1.02);
+}
+
+/* Retro Data Visualization */
+.chart-container {
+  background: var(--color-retro-cream);
+  border: 3px solid var(--color-border);
+  border-radius: 0;
+  padding: 20px;
+  position: relative;
+  box-shadow: 
+    inset 2px 2px 0 var(--color-surface),
+    inset -2px -2px 0 var(--color-retro-brown),
+    4px 4px 0 rgba(139, 69, 19, 0.2);
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 1px dashed var(--color-accent);
+  pointer-events: none;
+}
+
+/* Pixel Art Elements */
+.pixel-border {
+  border: 2px solid var(--color-text);
+  border-image: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m0 0h100v100h-100z' fill='none' stroke='%23000' stroke-width='2'/%3e%3c/svg%3e") 2;
+}
+
+.terminal-window {
+  background: var(--color-text);
+  color: var(--color-retro-amber);
+  font-family: var(--font-pixel);
+  padding: 8px;
+  border: 2px solid var(--color-border);
+  position: relative;
+}
+
+.terminal-window::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: 8px;
+  color: var(--color-retro-amber);
+}
+
+.cursor-blink::after {
+  content: '█';
+  animation: blink 1s infinite;
+  color: var(--color-retro-amber);
+}
