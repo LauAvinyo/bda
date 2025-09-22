@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PValueCalculator from '../components/PValueCalculator';
 import StatisticalPowerCalculator from '../components/StatisticalPowerCalculator';
+import BinomialCalculator from '../components/BinomialCalculator';
 
 const CalculatorsPage: React.FC = () => {
   const [activeCalculator, setActiveCalculator] = useState('pvalue');
@@ -12,11 +13,17 @@ const CalculatorsPage: React.FC = () => {
       description: 'Calculate p-values for statistical tests',
       icon: 'P'
     },
+    // {
+    //   id: 'power',
+    //   name: 'POWER.COM',
+    //   description: 'Statistical power and sample size',
+    //   icon: 'S'
+    // },
     {
-      id: 'power',
-      name: 'POWER.COM',
-      description: 'Statistical power and sample size',
-      icon: 'S'
+      id: 'binomial',
+      name: 'BINOMIAL.BAT',
+      description: 'Binomial probability calculator (pbinom)',
+      icon: 'B'
     }
   ];
 
@@ -54,6 +61,7 @@ const CalculatorsPage: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         {activeCalculator === 'pvalue' && <PValueCalculator />}
         {activeCalculator === 'power' && <StatisticalPowerCalculator />}
+        {activeCalculator === 'binomial' && <BinomialCalculator />}
       </div>
     </div>
   );
