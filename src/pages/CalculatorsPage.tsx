@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PValueCalculator from '../components/PValueCalculator';
 import StatisticalPowerCalculator from '../components/StatisticalPowerCalculator';
-import BinomialCalculator from '../components/BinomialCalculator';
+import ProbabilityCalculator from '../components/ProbabilityCalculator';
 
 const CalculatorsPage: React.FC = () => {
   const [activeCalculator, setActiveCalculator] = useState('pvalue');
@@ -20,10 +20,10 @@ const CalculatorsPage: React.FC = () => {
     //   icon: 'S'
     // },
     {
-      id: 'binomial',
-      name: 'BINOMIAL.BAT',
-      description: 'Binomial probability calculator (pbinom)',
-      icon: 'B'
+      id: 'probability',
+      name: 'PROBABILITY.BAT',
+      description: 'Multi-distribution calculator (Normal, Binomial, Poisson)',
+      icon: 'Π'
     }
   ];
 
@@ -61,7 +61,7 @@ const CalculatorsPage: React.FC = () => {
       <div className="max-w-5xl mx-auto">
         {activeCalculator === 'pvalue' && <PValueCalculator />}
         {activeCalculator === 'power' && <StatisticalPowerCalculator />}
-        {activeCalculator === 'binomial' && <BinomialCalculator />}
+        {activeCalculator === 'probability' && <ProbabilityCalculator />}
       </div>
     </div>
   );
