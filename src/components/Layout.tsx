@@ -22,47 +22,47 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Retro Computer Header */}
       <nav className="retro-card border-b-0 rounded-none sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-4 sm:py-0">
             {/* Retro Logo */}
             <Link to="/" className="flex items-center space-x-4 group">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-retro flex items-center justify-center border-2 border-solid" 
+                {/* <div className="w-14 h-14 bg-gradient-retro flex items-center justify-center border-2 border-solid" 
                      style={{borderColor: 'var(--color-text)'}}>
                   <span className="text-2xl font-display font-bold text-white">Σ</span>
-                </div>
+                </div> */}
                 <div className="absolute -top-1 -left-1 w-2 h-2 bg-amber-400"></div>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400"></div>
                 <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-amber-400"></div>
                 <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-amber-400"></div>
               </div>
-              <div>
-                <h1 className="text-2xl font-display font-bold gradient-text tracking-wider">
-                  BIOSTATS
+              <div className="text-center sm:text-left">
+                <h1 className="text-xl sm:text-2xl font-display font-bold gradient-text tracking-wider">
+                  BDA Calculator
                 </h1>
                 <div className="text-xs font-pixel text-amber-600 tracking-widest">
-                  RETRO COMPUTING SYSTEM
+                  Resources for BDA (BBI)
                 </div>
               </div>
             </Link>
             
-            {/* Retro Navigation */}
-            <div className="flex items-center space-x-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group relative px-3 py-2 transition-all duration-200 border-2 ${
-                    isActive(item.href)
-                      ? 'bg-amber-400 border-amber-600 text-amber-900'
-                      : 'bg-transparent border-amber-700 text-amber-700 hover:bg-amber-100 hover:text-amber-800'
-                  }`}
-                  style={{borderStyle: 'solid'}}
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="font-pixel text-sm tracking-wider">
-                      {item.label}
-                    </span>
-                  </div>
+          {/* Retro Navigation */}
+          <div className="flex flex-wrap items-center gap-2">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`group relative px-2 sm:px-3 py-2 transition-all duration-200 border-2 ${
+                  isActive(item.href)
+                    ? 'bg-amber-400 border-amber-600 text-amber-900'
+                    : 'bg-transparent border-amber-700 text-amber-700 hover:bg-amber-100 hover:text-amber-800'
+                }`}
+                style={{borderStyle: 'solid'}}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="font-pixel text-xs sm:text-sm tracking-wider">
+                    {item.label}
+                  </span>
+                </div>
                   
                   {/* Retro active indicator */}
                   {isActive(item.href) && (
@@ -113,14 +113,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         <div className="retro-card border-t-0 rounded-none">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-3 gap-8 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center md:text-left">
               {/* Left section */}
               <div>
                 <h3 className="font-display text-lg font-bold gradient-text-alt mb-2 tracking-wider">
-                  BIOSTATS.RETRO
+                  BDA 
                 </h3>
                 <p className="text-amber-700 text-sm font-pixel">
-                  Statistical Computing System v1.984
+                  Calculator v25.1
                 </p>
               </div>
               
@@ -137,12 +137,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
               
               {/* Right section */}
-              <div className="text-right">
+              <div className="text-center md:text-right">
                 <p className="text-amber-700 text-sm mb-1 font-pixel">
-                  Built with React + TypeScript
+                  Built with Love by @LAUAVINYO
                 </p>
                 <p className="text-amber-600 text-xs font-pixel">
-                  Powered by Tailwind v4 & Chart.js
+                  Powered by GitHub Pages
                 </p>
               </div>
             </div>
@@ -151,13 +151,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="mt-8 pt-6 border-t-2 border-dashed border-amber-600">
               <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
                 <p className="text-amber-600 text-xs font-pixel">
-                  © 1984-2024 BioStats Retro Systems. All rights reserved.
+                  © 2025 BDA Calculator. All rights reserved.
                 </p>
-                <div className="flex space-x-4 text-xs font-pixel text-amber-600">
-                  <span>KaTeX Math</span>
-                  <span>•</span>
-                  <span>Simple-Statistics</span>
-                </div>
               </div>
             </div>
           </div>

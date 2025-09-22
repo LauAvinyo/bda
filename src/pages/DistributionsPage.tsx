@@ -84,16 +84,13 @@ const DistributionsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="terminal-window inline-block mb-6 p-4">
-          <span className="font-pixel text-amber-400">LOADING CHARTS.COM</span>
-        </div>
-        <h1 className="text-4xl font-display font-bold mb-4 gradient-text tracking-wider">PROBABILITY DISTRIBUTIONS</h1>
+        <h1 className="text-2xl md:text-4xl font-display font-bold mb-4 gradient-text tracking-wider">PROBABILITY DISTRIBUTIONS</h1>
         <p className="text-lg text-amber-800 max-w-3xl mx-auto font-mono">
           Interactive statistical distribution visualization system
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Distribution Selection */}
         <div className="lg:col-span-1 space-y-4">
           <div className="retro-card p-4">

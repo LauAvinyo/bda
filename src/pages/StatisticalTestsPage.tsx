@@ -246,16 +246,13 @@ Where $SE(\\hat{\\beta_1}) = \\sqrt{\\frac{MSE}{\\sum(x_i - \\bar{x})^2}}$
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="terminal-window inline-block mb-6 p-4">
-          <span className="font-pixel text-amber-400">LOADING TESTS.EXE</span>
-        </div>
-        <h1 className="text-4xl font-display font-bold mb-4 gradient-text tracking-wider">STATISTICAL TESTS</h1>
+        <h1 className="text-2xl md:text-4xl font-display font-bold mb-4 gradient-text tracking-wider">STATISTICAL TESTS</h1>
         <p className="text-lg text-amber-800 max-w-3xl mx-auto font-mono">
           Comprehensive statistical test documentation library
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Test Selection Sidebar */}
         <div className="lg:col-span-1">
           <div className="retro-card p-4">

@@ -439,7 +439,7 @@ const PValueCalculator: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Input Panel */}
         <div className="retro-card p-6">
           <div className="terminal-window p-3 mb-4">
