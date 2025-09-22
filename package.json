@@ -11,7 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "https://YOUR_GITHUB_USERNAME.github.io/biostats-spa",
+  "homepage": "https://lauavinyo.github.io/biostats",
   "dependencies": {
     "chart.js": "^4.5.0",
     "katex": "^0.16.22",
