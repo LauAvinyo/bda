@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, annotationPlugin);
 
 const PValueCalculator: React.FC = () => {
   const [testType, setTestType] = useState('t-test');
@@ -7,6 +12,7 @@ const PValueCalculator: React.FC = () => {
   const [degreesOfFreedom, setDegreesOfFreedom] = useState(10);
   const [tailType, setTailType] = useState<'two-tailed' | 'left-tailed' | 'right-tailed'>('two-tailed');
   const [pValue, setPValue] = useState(0);
+  const [alpha, setAlpha] = useState(0.05);
 
   const testTypes = [
     { value: 't-test', label: 'T-test', needsDf: true },
@@ -40,9 +46,6 @@ const PValueCalculator: React.FC = () => {
 
   // T-distribution CDF using more accurate approximation
   const tCDF = (t: number, df: number): number => {
-    // For t-distribution, use the relationship with beta function
-    // P(T ≤ t) = 0.5 + (t/√(t²+df)) * B(1/2, df/2) * hypergeometric_function
-    
     if (df === 1) {
       // Cauchy distribution (t with df=1)
       return 0.5 + Math.atan(t) / Math.PI;
@@ -54,27 +57,113 @@ const PValueCalculator: React.FC = () => {
     }
     
     // For larger df, use better approximation
-    if (df >= 30) {
+    if (df >= 100) {
       // For large df, t-distribution approaches standard normal
       return normalCDF(t);
     }
     
-    // General case: use series approximation
-    const x = t / Math.sqrt(df);
-    const absX = Math.abs(x);
+    // General case: Use incomplete beta function approach
+    // P(T ≤ t) = 0.5 + 0.5 * sign(t) * I_x(df/2, 1/2)
+    // where x = df / (df + t²) and I is the regularized incomplete beta function
     
-    // Wilson-Hilferty approximation for moderate df
-    let p = 0;
-    if (absX < 4) {
-      // Series expansion
-      p = normalCDF(x * Math.sqrt((df - 1) / df) * (1 + (x * x + 1) / (4 * df) + (5 * x * x * x * x + 16 * x * x + 3) / (96 * df * df)));
-    } else {
-      // For extreme values, use asymptotic approximation
-      const z = Math.sqrt(df) * t / Math.sqrt(df + t * t);
-      p = normalCDF(z);
+    const x = df / (df + t * t);
+    const sign = t >= 0 ? 1 : -1;
+    const betaVal = incompleteBeta(df / 2, 0.5, x);
+    
+    return 0.5 + 0.5 * sign * (1 - betaVal);
+  };
+
+  // Inverse t-distribution CDF to find critical values
+  const tInverseCDF = (p: number, df: number): number => {
+    if (p <= 0) return -Infinity;
+    if (p >= 1) return Infinity;
+    
+    if (df === 1) {
+      // Cauchy distribution
+      return Math.tan(Math.PI * (p - 0.5));
     }
     
-    return Math.max(0, Math.min(1, p));
+    if (df === 2) {
+      // Analytical formula for df=2
+      const val = 2 * (p - 0.5);
+      return val / Math.sqrt(Math.max(0.0001, 1 - val * val));
+    }
+    
+    if (df >= 100) {
+      // Use normal approximation for large df
+      return normalInverseCDF(p);
+    }
+    
+    // Newton-Raphson method for general case
+    let t = normalInverseCDF(p); // Initial guess using normal distribution
+    
+    for (let i = 0; i < 10; i++) {
+      const cdf = tCDF(t, df);
+      const pdf = tPDF(t, df);
+      
+      if (Math.abs(cdf - p) < 1e-8 || pdf < 1e-10) break;
+      
+      t = t - (cdf - p) / pdf;
+    }
+    
+    return t;
+  };
+
+  // T-distribution PDF
+  const tPDF = (t: number, df: number): number => {
+    const gamma1 = Math.exp(logGamma((df + 1) / 2));
+    const gamma2 = Math.exp(logGamma(df / 2));
+    return (gamma1 / (Math.sqrt(df * Math.PI) * gamma2)) * 
+           Math.pow(1 + (t * t) / df, -(df + 1) / 2);
+  };
+
+  // Normal inverse CDF (quantile function)
+  const normalInverseCDF = (p: number): number => {
+    if (p <= 0) return -Infinity;
+    if (p >= 1) return Infinity;
+    
+    // Rational approximation for the inverse of the CDF
+    const a = [
+      -3.969683028665376e+01, 2.209460984245205e+02,
+      -2.759285104469687e+02, 1.383577518672690e+02,
+      -3.066479806614716e+01, 2.506628277459239e+00
+    ];
+    const b = [
+      -5.447609879822406e+01, 1.615858368580409e+02,
+      -1.556989798598866e+02, 6.680131188771972e+01,
+      -1.328068155288572e+01
+    ];
+    const c = [
+      -7.784894002430292e-03, -3.223964580411365e-01,
+      -2.400758277161838e+00, -2.549732539343734e+00,
+      4.374664141464968e+00, 2.938163982698783e+00
+    ];
+    const d = [
+      7.784695709041462e-03, 3.224671290700398e-01,
+      2.445134137142996e+00, 3.754408661907416e+00
+    ];
+    
+    const pLow = 0.02425;
+    const pHigh = 1 - pLow;
+    
+    let q, r, x;
+    
+    if (p < pLow) {
+      q = Math.sqrt(-2 * Math.log(p));
+      x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+          ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    } else if (p <= pHigh) {
+      q = p - 0.5;
+      r = q * q;
+      x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+          (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    } else {
+      q = Math.sqrt(-2 * Math.log(1 - p));
+      x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+           ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    
+    return x;
   };
 
   // Improved incomplete beta function using continued fraction
@@ -211,6 +300,34 @@ const PValueCalculator: React.FC = () => {
       default:
         return 0;
     }
+  };
+
+  // Calculate critical values based on alpha and tail type
+  const getCriticalValues = (): { lower: number | null; upper: number | null } => {
+    if (testType === 't-test') {
+      if (tailType === 'two-tailed') {
+        const criticalT = tInverseCDF(1 - alpha / 2, degreesOfFreedom);
+        return { lower: -criticalT, upper: criticalT };
+      } else if (tailType === 'left-tailed') {
+        const criticalT = tInverseCDF(alpha, degreesOfFreedom);
+        return { lower: criticalT, upper: null };
+      } else { // right-tailed
+        const criticalT = tInverseCDF(1 - alpha, degreesOfFreedom);
+        return { lower: null, upper: criticalT };
+      }
+    } else if (testType === 'z-test') {
+      if (tailType === 'two-tailed') {
+        const criticalZ = normalInverseCDF(1 - alpha / 2);
+        return { lower: -criticalZ, upper: criticalZ };
+      } else if (tailType === 'left-tailed') {
+        const criticalZ = normalInverseCDF(alpha);
+        return { lower: criticalZ, upper: null };
+      } else { // right-tailed
+        const criticalZ = normalInverseCDF(1 - alpha);
+        return { lower: null, upper: criticalZ };
+      }
+    }
+    return { lower: null, upper: null };
   };
 
   useEffect(() => {
@@ -354,6 +471,9 @@ const PValueCalculator: React.FC = () => {
     return datasets;
   };
 
+  const criticalValues = getCriticalValues();
+  const isRejected = (testType === 't-test' || testType === 'z-test') && pValue < alpha;
+
   const chartData = {
     labels: distributionData.map(p => p.x.toFixed(2)),
     datasets: createShadedDatasets(),
@@ -384,6 +504,71 @@ const PValueCalculator: React.FC = () => {
           size: 16,
         }
       },
+      annotation: {
+        annotations: {
+          ...(criticalValues.lower !== null && {
+            criticalLower: {
+              type: 'line',
+              xMin: distributionData.findIndex(p => p.x >= criticalValues.lower!),
+              xMax: distributionData.findIndex(p => p.x >= criticalValues.lower!),
+              borderColor: 'rgb(220, 38, 38)', // Red for critical value
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                display: true,
+                content: `Critical: ${criticalValues.lower!.toFixed(2)}`,
+                position: 'start',
+                backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                color: 'white',
+                font: {
+                  family: 'IBM Plex Mono',
+                  size: 10,
+                }
+              }
+            }
+          }),
+          ...(criticalValues.upper !== null && {
+            criticalUpper: {
+              type: 'line',
+              xMin: distributionData.findIndex(p => p.x >= criticalValues.upper!),
+              xMax: distributionData.findIndex(p => p.x >= criticalValues.upper!),
+              borderColor: 'rgb(220, 38, 38)', // Red for critical value
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                display: true,
+                content: `Critical: ${criticalValues.upper!.toFixed(2)}`,
+                position: 'end',
+                backgroundColor: 'rgba(220, 38, 38, 0.8)',
+                color: 'white',
+                font: {
+                  family: 'IBM Plex Mono',
+                  size: 10,
+                }
+              }
+            }
+          }),
+          testStatLine: {
+            type: 'line',
+            xMin: distributionData.findIndex(p => p.x >= testStatistic),
+            xMax: distributionData.findIndex(p => p.x >= testStatistic),
+            borderColor: isRejected ? 'rgb(34, 197, 94)' : 'rgb(59, 130, 246)', // Green if rejected, blue otherwise
+            borderWidth: 3,
+            label: {
+              display: true,
+              content: `t = ${testStatistic.toFixed(2)}`,
+              position: testStatistic > 0 ? 'end' : 'start',
+              backgroundColor: isRejected ? 'rgba(34, 197, 94, 0.9)' : 'rgba(59, 130, 246, 0.9)',
+              color: 'white',
+              font: {
+                family: 'IBM Plex Mono',
+                size: 11,
+                weight: 'bold'
+              }
+            }
+          }
+        }
+      }
     },
     scales: {
       x: {
@@ -509,6 +694,24 @@ const PValueCalculator: React.FC = () => {
                 </select>
               </div>
             )}
+
+            <div>
+              <label className="block text-sm font-pixel text-amber-800 mb-2 tracking-wide">
+                SIGNIFICANCE LEVEL (α)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.001"
+                max="0.999"
+                value={alpha}
+                onChange={(e) => setAlpha(parseFloat(e.target.value) || 0.05)}
+                className="w-full px-3 py-2 border-2 border-amber-600 bg-amber-50 font-mono text-amber-900 focus:outline-none focus:bg-amber-100"
+              />
+              <p className="text-xs font-mono text-amber-700 mt-1">
+                Common values: 0.05, 0.01, 0.001
+              </p>
+            </div>
           </div>
         </div>
 
@@ -546,12 +749,26 @@ const PValueCalculator: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-amber-50 border-2 border-dashed border-amber-600">
+            <div className="flex justify-between bg-amber-100 p-2 border border-amber-300">
+              <span className="font-pixel text-xs text-amber-800">ALPHA (α):</span>
+              <span className="font-bold font-mono text-orange-600">{alpha}</span>
+            </div>
+
+            <div className={`mt-4 p-3 border-2 border-dashed ${isRejected ? 'bg-green-50 border-green-600' : 'bg-amber-50 border-amber-600'}`}>
               <div className="text-sm font-mono text-amber-800">
-                <strong className="font-pixel">INTERPRETATION:</strong> {pValue < 0.05 
-                  ? "STATISTICALLY SIGNIFICANT (p < 0.05)" 
-                  : "NOT STATISTICALLY SIGNIFICANT (p ≥ 0.05)"}
+                <strong className="font-pixel">INTERPRETATION:</strong> {isRejected
+                  ? `REJECT NULL HYPOTHESIS (p = ${pValue.toFixed(6)} < α = ${alpha})` 
+                  : `FAIL TO REJECT NULL HYPOTHESIS (p = ${pValue.toFixed(6)} ≥ α = ${alpha})`}
               </div>
+              {(testType === 't-test' || testType === 'z-test') && (
+                <div className="mt-2 text-xs font-mono text-amber-700">
+                  {isRejected ? (
+                    <span className="text-green-700">✓ Test statistic falls in rejection region</span>
+                  ) : (
+                    <span>✗ Test statistic does not fall in rejection region</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -568,10 +785,25 @@ const PValueCalculator: React.FC = () => {
           <Line data={chartData} options={chartOptions} />
         </div>
         <div className="mt-4 p-3 bg-amber-50 border border-amber-300">
-          <p className="text-sm font-mono text-amber-800">
-            <span className="inline-block w-3 h-3 bg-orange-400 mr-2 border border-orange-600"></span>
-            The shaded orange area represents the p-value ({pValue.toFixed(6)}) for your test statistic ({testStatistic})
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm font-mono text-amber-800">
+              <span className="inline-block w-3 h-3 bg-orange-400 mr-2 border border-orange-600"></span>
+              <strong>Orange shaded area:</strong> P-value = {pValue.toFixed(6)}
+            </p>
+            {(testType === 't-test' || testType === 'z-test') && criticalValues.upper !== null && (
+              <p className="text-sm font-mono text-amber-800">
+                <span className="inline-block w-3 h-3 bg-red-600 mr-2 border border-red-800"></span>
+                <strong>Red dashed lines:</strong> Critical values at α = {alpha} ({tailType})
+              </p>
+            )}
+            {(testType === 't-test' || testType === 'z-test') && (
+              <p className="text-sm font-mono text-amber-800">
+                <span className={`inline-block w-3 h-3 mr-2 border ${isRejected ? 'bg-green-500 border-green-700' : 'bg-blue-500 border-blue-700'}`}></span>
+                <strong>Solid line:</strong> Your test statistic (t = {testStatistic}) - 
+                {isRejected ? ' Falls in rejection region' : ' Does not fall in rejection region'}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
