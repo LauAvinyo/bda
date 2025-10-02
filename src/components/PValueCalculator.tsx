@@ -508,16 +508,16 @@ const PValueCalculator: React.FC = () => {
         annotations: {
           ...(criticalValues.lower !== null && {
             criticalLower: {
-              type: 'line',
+              type: 'line' as const,
               xMin: distributionData.findIndex(p => p.x >= criticalValues.lower!),
               xMax: distributionData.findIndex(p => p.x >= criticalValues.lower!),
-              borderColor: 'rgb(220, 38, 38)', // Red for critical value
+              borderColor: 'rgb(220, 38, 38)',
               borderWidth: 2,
               borderDash: [5, 5],
               label: {
                 display: true,
                 content: `Critical: ${criticalValues.lower!.toFixed(2)}`,
-                position: 'start',
+                position: 'start' as const,
                 backgroundColor: 'rgba(220, 38, 38, 0.8)',
                 color: 'white',
                 font: {
@@ -529,16 +529,16 @@ const PValueCalculator: React.FC = () => {
           }),
           ...(criticalValues.upper !== null && {
             criticalUpper: {
-              type: 'line',
+              type: 'line' as const,
               xMin: distributionData.findIndex(p => p.x >= criticalValues.upper!),
               xMax: distributionData.findIndex(p => p.x >= criticalValues.upper!),
-              borderColor: 'rgb(220, 38, 38)', // Red for critical value
+              borderColor: 'rgb(220, 38, 38)',
               borderWidth: 2,
               borderDash: [5, 5],
               label: {
                 display: true,
                 content: `Critical: ${criticalValues.upper!.toFixed(2)}`,
-                position: 'end',
+                position: 'end' as const,
                 backgroundColor: 'rgba(220, 38, 38, 0.8)',
                 color: 'white',
                 font: {
@@ -549,21 +549,21 @@ const PValueCalculator: React.FC = () => {
             }
           }),
           testStatLine: {
-            type: 'line',
+            type: 'line' as const,
             xMin: distributionData.findIndex(p => p.x >= testStatistic),
             xMax: distributionData.findIndex(p => p.x >= testStatistic),
-            borderColor: isRejected ? 'rgb(34, 197, 94)' : 'rgb(59, 130, 246)', // Green if rejected, blue otherwise
+            borderColor: isRejected ? 'rgb(34, 197, 94)' : 'rgb(59, 130, 246)',
             borderWidth: 3,
             label: {
               display: true,
               content: `t = ${testStatistic.toFixed(2)}`,
-              position: testStatistic > 0 ? 'end' : 'start',
+              position: testStatistic > 0 ? ('end' as const) : ('start' as const),
               backgroundColor: isRejected ? 'rgba(34, 197, 94, 0.9)' : 'rgba(59, 130, 246, 0.9)',
               color: 'white',
               font: {
                 family: 'IBM Plex Mono',
                 size: 11,
-                weight: 'bold'
+                weight: 'bold' as const
               }
             }
           }

@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono:wght@400&family=Courier+Prime:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
-@import "katex/dist/katex.min.css";
 
 /* Nostalgic Retro Computing Theme */
 :root {
